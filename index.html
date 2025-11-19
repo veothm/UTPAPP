@@ -2,41 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Untitled Pirates | HR Verification</title>
+  <title>Discord Role Check</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      background-color: #1e1f26;
-      color: #ffffff;
-      font-family: 'Rubik', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-    }
-    h1 { color: #7289da; font-size: 2.8em; }
-    .login-button {
-      background-color: #5865f2;
-      color: white;
-      padding: 15px 35px;
-      font-size: 18px;
-      border-radius: 10px;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
-    .login-button:hover { background-color: #4752c4; }
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    .card { max-width: 540px; border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    .btn { background: #5865F2; color: white; padding: 10px 14px; border: 0; border-radius: 6px; cursor: pointer; }
+    .preview { margin-top: 12px; padding: 10px; background: #f4f4f8; border-radius: 6px; }
+    .muted { color: #666; }
   </style>
 </head>
 <body>
-  <h1>🔐 HR Role Access</h1>
-  <p>Log in with Discord to verify your HR role.</p>
+  <div class="card">
+    <h1>Check My Discord Role</h1>
+    <p class="muted">Sign in to verify your identity and send it to staff.</p>
+    <button id="login" class="btn">Sign in with Discord</button>
+    <div id="preview" class="preview"></div>
+  </div>
 
-  <!-- OAuth2 Login Button -->
-  <a class="login-button"
-     href="https://discord.com/oauth2/authorize?client_id=1433846650278908026&response_type=code&redirect_uri=https%3A%2F%2Futpapp.vercel.app%2Fcallback&scope=identify+guilds+guilds.members.read">
-    Login with Discord
-  </a>
+  <script>
+    const CLIENT_ID = "YOUR_CLIENT_ID";
+    const REDIRECT_URI = "https://yourusername.github.io/yourrepo/";
+    const WEBHOOK_URL = "YOUR_WEBHOOK_URL";
+
+    // Step 1: Redirect to Discord OAuth2
+    document.getElementById("login").addEventListener("click", () => {
+      const params = new URLSearchParams({
+        client_id: CLIENT_ID,
+        response_type: "token",
+        redirect_uri: REDIRECT_URI,
+        scope: "identify"
+      });
+      window.location.href = `https://discord.com/oauth2/authorize?${params.toString()}`;
+    });
+
+    // Step 2: On redirect, extract token and fetch user info
+    window.addEventListener("load", async () => {
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const token = hash.get("access_token");
+      if (!token) return;
+
+      const res = await fetch("https://discord.com/api/users/@me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const user = await res.json();
+
+      // Step 3: Send to webhook
+      const payload = {
+        username: "Role Checker",
+        embeds: [{
+          title: "New Role Check",
+          fields: [
+            { name: "Username", value: `${user.username}#${user.discriminator}`, inline: true },
+            { name: "User ID", value: user.id, inline: true }
+          ],
+          color: 5814783
+        }]
+      };
+
+      await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      // Step 4: Show preview
+      document.getElementById("preview").innerHTML = `
+        ✅ Sent to staff:<br>
+        <strong>${user.username}#${user.discriminator}</strong><br>
+        ID: ${user.id}
+      `;
+    });
+  </script>
 </body>
 </html>
