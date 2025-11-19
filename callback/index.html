@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Untitled Pirates | Callback</title>
+  <title>Untitled Pirates | HR Verification</title>
   <style>
     body {
       background-color: #1e1f26;
@@ -16,44 +16,27 @@
       min-height: 100vh;
       text-align: center;
     }
-    h1 {
-      color: #7289da;
-      font-size: 2.4em;
+    h1 { color: #7289da; font-size: 2.8em; }
+    .login-button {
+      background-color: #5865f2;
+      color: white;
+      padding: 15px 35px;
+      font-size: 18px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
     }
-    #code-box {
-      margin-top: 20px;
-      font-size: 1.1em;
-      color: #00ffcc;
-      white-space: pre-wrap;
-    }
-    .footer {
-      margin-top: 40px;
-      font-size: 0.9em;
-      color: #aaaaaa;
-    }
+    .login-button:hover { background-color: #4752c4; }
   </style>
 </head>
 <body>
-  <h1>🔐 OAuth2 Callback</h1>
-  <p>Discord has redirected you back with a code.</p>
+  <h1>🔐 HR Role Access</h1>
+  <p>Log in with Discord to verify your HR role.</p>
 
-  <div id="code-box">Waiting for code...</div>
-
-  <div class="footer">
-    Powered by UTP BOT • Role-based access control
-  </div>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-
-    if (code) {
-      document.getElementById("code-box").innerText =
-        `✅ Code received:\n${code}\n\nSend this to the backend for verification.`;
-    } else {
-      document.getElementById("code-box").innerText =
-        "❌ No code found in the URL.";
-    }
-  </script>
+  <!-- OAuth2 Login Button -->
+  <a class="login-button"
+     href="https://discord.com/oauth2/authorize?client_id=1433846650278908026&response_type=code&redirect_uri=https%3A%2F%2Futpapp.vercel.app%2Fcallback&scope=identify+guilds+guilds.members.read">
+    Login with Discord
+  </a>
 </body>
 </html>
