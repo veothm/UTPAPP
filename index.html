@@ -1,77 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Discord Role Check</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>MAJOR RAID Dispatcher</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; }
-    .card { max-width: 540px; border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
-    .btn { background: #5865F2; color: white; padding: 10px 14px; border: 0; border-radius: 6px; cursor: pointer; }
-    .preview { margin-top: 12px; padding: 10px; background: #f4f4f8; border-radius: 6px; }
-    .muted { color: #666; }
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #f9f9fc; }
+    .card { max-width: 600px; border: 1px solid #ddd; border-radius: 10px; padding: 20px; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .btn { background: #5865F2; color: white; padding: 10px 14px; border: 0; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+    .preview { margin-top: 16px; padding: 12px; background: #f4f4f8; border-radius: 6px; font-size: 0.95em; }
+    input, textarea { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Check My Discord Role</h1>
-    <p class="muted">Sign in to verify your identity and send it to staff.</p>
-    <button id="login" class="btn">Sign in with Discord</button>
+    <h2>🔥 MAJOR RAID Dispatcher</h2>
+    <input id="password" type="text" placeholder="Enter password">
+    <textarea id="raidMessage" rows="5">### 🔥 MAJOR RAID NOW | Type: MAJOR RAID | Players: 5–6 | Duration: 45–60 min | Status: ACTIVE — JOIN IMMEDIATELY</textarea>
+    <button id="send" class="btn">Send to Discord</button>
     <div id="preview" class="preview"></div>
   </div>
 
   <script>
-    const CLIENT_ID = "YOUR_CLIENT_ID";
-    const REDIRECT_URI = "https://veothm.github.io/UTPAPP/";
-    const WEBHOOK_URL = "YOUR_WEBHOOK_URL";
+    const GITHUB_TOKEN = "YOUR_PAT_HERE"; // ⚠️ Use backend or OAuth to keep this secret
+    const REPO = "your-username/your-repo";
+    const EVENT_TYPE = "discord_notify";
 
-    // Step 1: Redirect to Discord OAuth2
-    document.getElementById("login").addEventListener("click", () => {
-      const params = new URLSearchParams({
-        client_id: CLIENT_ID,
-        response_type: "token",
-        redirect_uri: REDIRECT_URI,
-        scope: "identify"
-      });
-      window.location.href = `https://discord.com/oauth2/authorize?${params.toString()}`;
-    });
+    document.getElementById("send").addEventListener("click", async () => {
+      const password = document.getElementById("password").value.trim();
+      const message = document.getElementById("raidMessage").value.trim();
 
-    // Step 2: On redirect, extract token and fetch user info
-    window.addEventListener("load", async () => {
-      const hash = new URLSearchParams(window.location.hash.slice(1));
-      const token = hash.get("access_token");
-      if (!token) return;
-
-      const res = await fetch("https://discord.com/api/users/@me", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const user = await res.json();
-
-      // Step 3: Send to webhook
       const payload = {
-        username: "Role Checker",
-        embeds: [{
-          title: "New Role Check",
-          fields: [
-            { name: "Username", value: `${user.username}#${user.discriminator}`, inline: true },
-            { name: "User ID", value: user.id, inline: true }
-          ],
-          color: 5814783
-        }]
+        event_type: EVENT_TYPE,
+        client_payload: {
+          password: password,
+          message: message
+        }
       };
 
-      await fetch(WEBHOOK_URL, {
+      const res = await fetch(`https://api.github.com/repos/${REPO}/dispatches`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json",
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload)
       });
 
-      // Step 4: Show preview
-      document.getElementById("preview").innerHTML = `
-        ✅ Sent to staff:<br>
-        <strong>${user.username}#${user.discriminator}</strong><br>
-        ID: ${user.id}
-      `;
+      document.getElementById("preview").innerHTML =
+        res.ok ? `✅ Sent: ${message}` : `❌ Error: ${res.status}`;
     });
   </script>
 </body>
