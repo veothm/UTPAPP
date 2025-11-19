@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Untitled Pirates | HR Verification</title>
+  <title>OAuth2 Callback</title>
   <style>
     body {
       background-color: #1e1f26;
@@ -16,27 +16,41 @@
       min-height: 100vh;
       text-align: center;
     }
-    h1 { color: #7289da; font-size: 2.8em; }
-    .login-button {
-      background-color: #5865f2;
-      color: white;
-      padding: 15px 35px;
-      font-size: 18px;
-      border-radius: 10px;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
-    .login-button:hover { background-color: #4752c4; }
+    h1 { color: #7289da; font-size: 2.4em; }
+    #code-box { margin-top: 20px; font-size: 1.1em; color: #00ffcc; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <h1>🔐 HR Role Access</h1>
-  <p>Log in with Discord to verify your HR role.</p>
+  <h1>🔐 OAuth2 Callback</h1>
+  <p>Discord has redirected you back with a code.</p>
+  <div id="code-box">Waiting for code...</div>
 
-  <!-- OAuth2 Login Button -->
-  <a class="login-button"
-     href="https://discord.com/oauth2/authorize?client_id=1433846650278908026&response_type=code&redirect_uri=https%3A%2F%2Futpapp.vercel.app%2Fcallback&scope=identify+guilds+guilds.members.read">
-    Login with Discord
-  </a>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+
+    if (code) {
+      document.getElementById("code-box").innerText =
+        `✅ Code received:\n${code}\n\nSending this to the backend for HR role verification...`;
+
+      // Auto-send to backend
+      fetch("https://utpapp-backend.vercel.app/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("code-box").innerText +=
+          `\n\nBackend response:\n${data.message}`;
+      })
+      .catch(err => {
+        document.getElementById("code-box").innerText +=
+          `\n\nError contacting backend: ${err}`;
+      });
+    } else {
+      document.getElementById("code-box").innerText = "❌ No code found in the URL.";
+    }
+  </script>
 </body>
 </html>
