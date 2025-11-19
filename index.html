@@ -15,10 +15,7 @@
   <div class="card">
     <h2>🔥 Raid Dispatcher</h2>
     <input id="password" type="text" placeholder="Enter password">
-
-    <!-- Text area pre-filled from JS variable -->
     <textarea id="raidMessage" rows="5"></textarea>
-
     <button id="send" class="btn">Send to Discord</button>
     <div id="preview" class="preview"></div>
   </div>
@@ -26,17 +23,12 @@
   <script>
     // Default raid message stored in a JS variable
     const raidMessage = "### 🔥 MAJOR RAID NOW | Type: MAJOR RAID | Players: 5–6 | Duration: 45–60 min | Status: ACTIVE — JOIN IMMEDIATELY";
-
-    // Pre-fill the textarea with the raidMessage
     document.getElementById("raidMessage").value = raidMessage;
 
-    // Replace with your repo info
-    const REPO = "your-username/your-repo";
+    // Replace with your actual repo and token
+    const REPO = "your-username/your-repo"; // e.g., "dishaan/raid-dispatcher"
     const EVENT_TYPE = "discord_notify";
-
-    // ⚠️ Use a Personal Access Token (PAT) here for testing only.
-    // Best practice: keep this in GitHub Secrets or a backend relay.
-    const GITHUB_TOKEN = "ghp_yourRealTokenHere";
+    const GITHUB_TOKEN = "ghp_yourActualTokenHere"; // ⚠️ Use only for private/internal testing
 
     document.getElementById("send").addEventListener("click", async () => {
       const password = document.getElementById("password").value.trim();
@@ -61,7 +53,7 @@
       });
 
       document.getElementById("preview").innerHTML =
-        res.ok ? `✅ Sent: ${message}` : `❌ Error: ${res.status}`;
+        res.ok ? `✅ Sent: ${message}` : `❌ Error ${res.status}: ${res.statusText}`;
     });
   </script>
 </body>
